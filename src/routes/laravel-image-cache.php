@@ -1,7 +1,7 @@
 <?php
 
 Route::group(['middleware' => 'web'], function () {
-    Route::get('image/{w}/{h}/{path}', function ($w, $h, $path) {
+    Route::get(config('laravel-image-cache.route_name', 'image').'/{w}/{h}/{path}', function ($w, $h, $path) {
         $hash = 'cached_images/' . hash('sha512', $w . $h . $path);
         $final_path = storage_path('app/cached_images/' . hash('sha512', $w . $h . $path));
 
