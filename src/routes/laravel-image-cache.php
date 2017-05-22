@@ -5,7 +5,17 @@ Route::group(['middleware' => 'web'], function () {
         $hash = 'cached_images/' . hash('sha512', $w . $h . $path);
         $final_path = storage_path('app/cached_images/' . hash('sha512', $w . $h . $path));
 
-        if (!Illuminate\Support\Facades\Storage::exists($hash)) {
+        $exists = Illuminate\Support\Facades\Storage::exists($hash);
+        // Check if image is older than 7 days
+        if ($exists) {
+            $now = \Carbon\Carbon::now();
+            $file_date = \Carbon\Carbon::parse(date ("Y-m-d H:i:s", filemtime($final_path)));
+            if ($file_date->diffInDays($now) > 7) {
+                $exists = false;
+            }
+        }
+
+        if (! $exists) {
             $file = file_get_contents(config('laravel-image-cache.cache_from') . $path);
             Storage::put($hash, $file);
 
