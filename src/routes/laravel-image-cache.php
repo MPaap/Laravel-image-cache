@@ -9,7 +9,7 @@ Route::group(['middleware' => 'web'], function () {
         // Check if image is older than 7 days
         if ($exists) {
             $now = \Carbon\Carbon::now();
-            $file_date = \Carbon\Carbon::parse(date ("Y-m-d H:i:s", filemtime($final_path)));
+            $file_date = \Carbon\Carbon::parse(date("Y-m-d H:i:s", filemtime($final_path)));
             if ($file_date->diffInDays($now) > 7) {
                 $exists = false;
             }
@@ -18,13 +18,9 @@ Route::group(['middleware' => 'web'], function () {
         if (! $exists) {
             $file = file_get_contents(config('laravel-image-cache.cache_from') . $path);
             Storage::put($hash, $file);
-
             $canvas = Intervention\Image\Facades\Image::canvas($w, $h);
-
             $image = Intervention\Image\Facades\Image::make($final_path)->fit($w, $h);
-
             $canvas->insert($image, 'center');
-
             $canvas->save($final_path, 70);
         }
 
