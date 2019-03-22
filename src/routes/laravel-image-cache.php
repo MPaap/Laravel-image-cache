@@ -16,14 +16,14 @@ Route::group(['middleware' => 'web'], function () {
         }
 
         if (! $exists) {
-            if (\Illuminate\Support\Facades\File::exists(storage_path($path))) {
+            try {
                 $file = file_get_contents(config('laravel-image-cache.cache_from') . $path);
                 Storage::put($hash, $file);
                 $canvas = Intervention\Image\Facades\Image::canvas($w, $h);
                 $image = Intervention\Image\Facades\Image::make($final_path)->fit($w, $h);
                 $canvas->insert($image, 'center');
                 $canvas->save($final_path, 70);
-            } else {
+            } catch(Exception $e) {
                 abort(404);
             }
         }
