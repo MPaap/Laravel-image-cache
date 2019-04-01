@@ -17,12 +17,21 @@ Route::group(['middleware' => 'web'], function () {
 
         if (! $exists) {
             try {
-                $file = file_get_contents(config('laravel-image-cache.cache_from') . $path);
+                $host = request()->getSchemeAndHttpHost();
+
+                if (strpos($path, $host) > -1) {
+                    $local_path = str_replace($host, '', $path);
+                    $file = \Illuminate\Support\Facades\Storage::get(config('laravel-image-cache.cache_from') . $local_path);
+                } else {
+                    $file = file_get_contents(config('laravel-image-cache.cache_from') . $path);
+                }
+
                 Storage::put($hash, $file);
                 $canvas = Intervention\Image\Facades\Image::canvas($w, $h);
                 $image = Intervention\Image\Facades\Image::make($final_path)->fit($w, $h);
                 $canvas->insert($image, 'center');
                 $canvas->save($final_path, 70);
+                return $canvas->response();
             } catch(Exception $e) {
                 abort(404);
             }
